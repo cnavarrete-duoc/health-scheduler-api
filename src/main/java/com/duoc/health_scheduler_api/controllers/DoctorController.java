@@ -6,13 +6,16 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.duoc.health_scheduler_api.models.Doctor;
-import com.duoc.health_scheduler_api.models.Slots;
 import com.duoc.health_scheduler_api.services.DoctorService;
 
 @RestController
@@ -32,6 +35,25 @@ public class DoctorController {
         return ResponseEntity.ok(doctorService.getAllDoctors());
     }
 
+    @PostMapping
+    public ResponseEntity<Doctor> addDoctor(@RequestBody Doctor doctor) {
+        logger.info("Adding doctor: {}", doctor);
+        return ResponseEntity.ok(doctorService.addDoctor(doctor));
+    }
+
+    @PutMapping
+    public ResponseEntity<Doctor> updateDoctor(@RequestBody Doctor doctor) {
+        logger.info("Update doctor: {}", doctor);
+        return ResponseEntity.ok(doctorService.updateDoctor(doctor));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Doctor> deleteDoctor(int doctorId) {
+        logger.info("Delete doctor id: {}", doctorId);
+        doctorService.deleteDoctor(doctorId);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/{doctorId}")
     public ResponseEntity<Doctor> getDoctorById(@PathVariable int doctorId) {
         logger.info("Fetching doctor by id: {}", doctorId);
@@ -45,13 +67,4 @@ public class DoctorController {
 
         return ResponseEntity.ok(doctor);
     }
-
-    @GetMapping("/slots/{doctorId}")
-    public ResponseEntity<List<Slots>> getAvailableSlotsByDoctorId(
-            @PathVariable int doctorId) {
-        logger.info("Fetching available slots by doctor id: {}", doctorId);
-
-        return ResponseEntity.ok(doctorService.getAvailableSlotsByDoctorId(doctorId));
-    }
-
 }

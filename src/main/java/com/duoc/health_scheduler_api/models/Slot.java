@@ -16,17 +16,26 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "doctor")
-public class Doctor {
+@Table(name = "slot")
+public class Slot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 
+    @Column(name = "dateSlot")
+    private String date;
+
+    @Column(name = "doctorId")
+    private int doctorId;
+
     @Column(name = "doctorName")
     private String doctorName;
 
-    @Column(name = "speciality")
-    private String speciality;
+    @Column(name = "timeSlot")
+    private String time;
+
+    @Column(name = "status")
+    private String status;
 }
