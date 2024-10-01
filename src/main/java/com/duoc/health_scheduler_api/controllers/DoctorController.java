@@ -31,146 +31,148 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1")
 public class DoctorController {
 
-    private static final Logger logger = LoggerFactory.getLogger(DoctorController.class);
-    private final DoctorService doctorService;
+        private static final Logger logger = LoggerFactory.getLogger(DoctorController.class);
+        private final DoctorService doctorService;
 
-    public DoctorController(DoctorService doctorService) {
-        this.doctorService = doctorService;
-    }
-
-    @GetMapping("/doctors")
-    public ResponseEntity<CollectionModel<EntityModel<Doctor>>> getDoctors() {
-        logger.info("GET /api/v1/doctor");
-        logger.info("Received request to get all appointments");
-
-        List<Doctor> doctors = doctorService.getAllDoctors();
-        List<EntityModel<Doctor>> doctorModels = doctors.stream()
-                .map(doctor -> EntityModel.of(doctor,
-                        WebMvcLinkBuilder.linkTo(
-                                WebMvcLinkBuilder.methodOn(this.getClass()).getDoctorById(doctor.getId()))
-                                .withSelfRel(),
-                        WebMvcLinkBuilder
-                                .linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).updateDoctor(doctor.getId(),
-                                        doctor))
-                                .withRel(Keys.UPDATE),
-                        WebMvcLinkBuilder
-                                .linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).deleteDoctor(doctor.getId()))
-                                .withRel(Keys.DELETE)))
-                .collect(Collectors.toList());
-
-        CollectionModel<EntityModel<Doctor>> collectionModel = CollectionModel.of(doctorModels,
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getDoctors())
-                        .withSelfRel());
-
-        return ResponseEntity.ok(collectionModel);
-    }
-
-    @PostMapping(path = "/doctor", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<EntityModel<Doctor>> addDoctor(@Valid @RequestBody Doctor doctor) {
-        logger.info("POST /api/v1/doctor");
-        logger.info("Adding doctor: {}", doctor);
-
-        Doctor newDoctor = doctorService.addDoctor(doctor);
-
-        EntityModel<Doctor> doctorModel = EntityModel.of(newDoctor,
-                WebMvcLinkBuilder.linkTo(
-                        WebMvcLinkBuilder.methodOn(this.getClass()).getDoctorById(newDoctor.getId()))
-                        .withSelfRel(),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getDoctors())
-                        .withRel(Keys.DOCTORS));
-
-        return ResponseEntity.created(
-                WebMvcLinkBuilder.linkTo(
-                        WebMvcLinkBuilder.methodOn(this.getClass()).getDoctorById(newDoctor.getId()))
-                        .toUri())
-                .body(doctorModel);
-    }
-
-    @PutMapping("/doctor/{doctorId}")
-    public ResponseEntity<EntityModel<Doctor>> updateDoctor(@PathVariable int doctorId,
-            @Valid @RequestBody Doctor doctor) {
-        logger.info("PUT /api/v1/doctor/{}", doctorId);
-        logger.info("Update doctor: {}", doctor);
-
-        Doctor currentDoctor = doctorService.getDoctorById(doctorId);
-
-        if (Objects.isNull(currentDoctor)) {
-            logger.error(Messages.DOCTOR_NOT_FOUND, doctorId);
-            return ResponseEntity.notFound().build();
+        public DoctorController(DoctorService doctorService) {
+                this.doctorService = doctorService;
         }
 
-        currentDoctor.setDoctorName(doctor.getDoctorName());
-        currentDoctor.setSpeciality(doctor.getSpeciality());
+        @GetMapping("/doctors")
+        public ResponseEntity<CollectionModel<EntityModel<Doctor>>> getDoctors() {
+                logger.info("GET /api/v1/doctor");
+                logger.info("Received request to get all appointments");
 
-        Doctor updatedDoctor = doctorService.updateDoctor(currentDoctor);
+                List<Doctor> doctors = doctorService.getAllDoctors();
+                List<EntityModel<Doctor>> doctorModels = doctors.stream()
+                                .map(doctor -> EntityModel.of(doctor,
+                                                WebMvcLinkBuilder.linkTo(
+                                                                WebMvcLinkBuilder.methodOn(this.getClass())
+                                                                                .getDoctorById(doctor.getId()))
+                                                                .withSelfRel(),
+                                                WebMvcLinkBuilder
+                                                                .linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
+                                                                                .updateDoctor(doctor.getId(),
+                                                                                                doctor))
+                                                                .withRel(Keys.UPDATE),
+                                                WebMvcLinkBuilder
+                                                                .linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
+                                                                                .deleteDoctor(doctor.getId()))
+                                                                .withRel(Keys.DELETE)))
+                                .collect(Collectors.toList());
 
-        EntityModel<Doctor> doctorModel = EntityModel.of(updatedDoctor,
-                WebMvcLinkBuilder.linkTo(
-                        WebMvcLinkBuilder.methodOn(this.getClass()).getDoctorById(updatedDoctor.getId()))
-                        .withSelfRel(),
-                WebMvcLinkBuilder
-                        .linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).updateDoctor(updatedDoctor.getId(),
-                                doctor))
-                        .withRel(Keys.UPDATE),
-                WebMvcLinkBuilder
-                        .linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).deleteDoctor(updatedDoctor.getId()))
-                        .withRel(Keys.DELETE),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getDoctors())
-                        .withRel(Keys.DOCTORS));
+                CollectionModel<EntityModel<Doctor>> collectionModel = CollectionModel.of(doctorModels,
+                                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getDoctors())
+                                                .withSelfRel());
 
-        return ResponseEntity.ok(doctorModel);
-    }
-
-    @GetMapping("/doctor/{doctorId}")
-    public ResponseEntity<EntityModel<Doctor>> getDoctorById(@PathVariable int doctorId) {
-        logger.info("GET /api/v1/doctor/{}", doctorId);
-        logger.info("Fetching doctor by id: {}", doctorId);
-
-        Doctor doctor = doctorService.getDoctorById(doctorId);
-
-        if (Objects.isNull(doctor)) {
-            logger.error("Doctor not found with ID {}", doctorId);
-            return ResponseEntity.notFound().build();
+                return ResponseEntity.ok(collectionModel);
         }
 
-        EntityModel<Doctor> doctorModel = EntityModel.of(doctor,
-                WebMvcLinkBuilder.linkTo(
-                        WebMvcLinkBuilder.methodOn(this.getClass()).getDoctorById(doctorId))
-                        .withSelfRel(),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getDoctors())
-                        .withRel(Keys.DOCTORS),
-                WebMvcLinkBuilder
-                        .linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).updateDoctor(doctorId, doctor))
-                        .withRel(Keys.UPDATE),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).deleteDoctor(doctorId))
-                        .withRel(Keys.DELETE));
+        @PostMapping(path = "/doctor", consumes = MediaType.APPLICATION_JSON_VALUE)
+        public ResponseEntity<EntityModel<Doctor>> addDoctor(@Valid @RequestBody Doctor doctor) {
+                logger.info("POST /api/v1/doctor");
+                logger.info("Adding doctor: {}", doctor);
 
-        return ResponseEntity.ok(doctorModel);
-    }
+                Doctor newDoctor = doctorService.addDoctor(doctor);
 
-    @DeleteMapping("/doctor/{doctorId}")
-    public ResponseEntity<EntityModel<String>> deleteDoctor(@PathVariable int doctorId) {
-        logger.info("DELETE /api/v1/doctor/{}", doctorId);
-        logger.info("Delete doctor id: {}", doctorId);
+                EntityModel<Doctor> doctorModel = EntityModel.of(newDoctor,
+                                WebMvcLinkBuilder.linkTo(
+                                                WebMvcLinkBuilder.methodOn(this.getClass())
+                                                                .getDoctorById(newDoctor.getId()))
+                                                .withSelfRel(),
+                                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getDoctors())
+                                                .withRel(Keys.DOCTORS));
 
-        Doctor doctor = doctorService.getDoctorById(doctorId);
-
-        if (Objects.isNull(doctor)) {
-            logger.error("Doctor not found with ID {}", doctorId);
-            return ResponseEntity.notFound().build();
+                return ResponseEntity.created(
+                                WebMvcLinkBuilder.linkTo(
+                                                WebMvcLinkBuilder.methodOn(this.getClass())
+                                                                .getDoctorById(newDoctor.getId()))
+                                                .toUri())
+                                .body(doctorModel);
         }
 
-        doctorService.deleteDoctor(doctorId);
+        @PutMapping("/doctor/{doctorId}")
+        public ResponseEntity<EntityModel<Doctor>> updateDoctor(@PathVariable int doctorId,
+                        @Valid @RequestBody Doctor doctor) {
+                logger.info("PUT /api/v1/doctor/{}", doctorId);
+                logger.info("Update doctor: {}", doctor);
 
-        String message = "Doctor with ID " + doctorId + " has been deleted.";
+                Doctor currentDoctor = doctorService.getDoctorById(doctorId);
 
-        EntityModel<String> responseModel = EntityModel.of(message,
-                WebMvcLinkBuilder.linkTo(
-                        WebMvcLinkBuilder.methodOn(this.getClass()).getDoctors())
-                        .withRel(Keys.DOCTORS),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).addDoctor(doctor))
-                        .withRel(Keys.POST));
+                if (Objects.isNull(currentDoctor)) {
+                        logger.error(Messages.DOCTOR_NOT_FOUND, doctorId);
+                        return ResponseEntity.notFound().build();
+                }
 
-        return ResponseEntity.ok(responseModel);
-    }
+                currentDoctor.setDoctorName(doctor.getDoctorName());
+                currentDoctor.setSpeciality(doctor.getSpeciality());
+
+                Doctor updatedDoctor = doctorService.updateDoctor(currentDoctor);
+
+                EntityModel<Doctor> doctorModel = EntityModel.of(updatedDoctor,
+                                WebMvcLinkBuilder.linkTo(
+                                                WebMvcLinkBuilder.methodOn(this.getClass())
+                                                                .getDoctorById(updatedDoctor.getId()))
+                                                .withSelfRel(),
+                                WebMvcLinkBuilder
+                                                .linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).updateDoctor(
+                                                                updatedDoctor.getId(),
+                                                                doctor))
+                                                .withRel(Keys.UPDATE),
+                                WebMvcLinkBuilder
+                                                .linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
+                                                                .deleteDoctor(updatedDoctor.getId()))
+                                                .withRel(Keys.DELETE),
+                                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getDoctors())
+                                                .withRel(Keys.DOCTORS));
+
+                return ResponseEntity.ok(doctorModel);
+        }
+
+        @GetMapping("/doctor/{doctorId}")
+        public ResponseEntity<EntityModel<Doctor>> getDoctorById(@PathVariable int doctorId) {
+                logger.info("GET /api/v1/doctor/{}", doctorId);
+                logger.info("Fetching doctor by id: {}", doctorId);
+
+                Doctor doctor = doctorService.getDoctorById(doctorId);
+
+                if (Objects.isNull(doctor)) {
+                        logger.error("Doctor not found with ID {}", doctorId);
+                        return ResponseEntity.notFound().build();
+                }
+
+                EntityModel<Doctor> doctorModel = EntityModel.of(doctor,
+                                WebMvcLinkBuilder.linkTo(
+                                                WebMvcLinkBuilder.methodOn(this.getClass()).getDoctorById(doctorId))
+                                                .withSelfRel(),
+                                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getDoctors())
+                                                .withRel(Keys.DOCTORS),
+                                WebMvcLinkBuilder
+                                                .linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
+                                                                .updateDoctor(doctorId, doctor))
+                                                .withRel(Keys.UPDATE),
+                                WebMvcLinkBuilder
+                                                .linkTo(WebMvcLinkBuilder.methodOn(this.getClass())
+                                                                .deleteDoctor(doctorId))
+                                                .withRel(Keys.DELETE));
+
+                return ResponseEntity.ok(doctorModel);
+        }
+
+        @DeleteMapping("/doctor/{doctorId}")
+        public ResponseEntity<Void> deleteDoctor(@PathVariable int doctorId) {
+                logger.info("DELETE /api/v1/doctor/{}", doctorId);
+                logger.info("Delete doctor id: {}", doctorId);
+
+                Doctor doctor = doctorService.getDoctorById(doctorId);
+
+                if (doctor == null) {
+                        logger.error("Doctor not found with ID {}", doctorId);
+                        return ResponseEntity.notFound().build();
+                }
+
+                doctorService.deleteDoctor(doctorId);
+
+                return ResponseEntity.noContent().build(); // Devuelve 204 No Content
+        }
 }
