@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,9 +28,11 @@ public class Slot {
     @Column(name = "dateSlot")
     private String date;
 
+    @NotBlank(message = "Doctor id is required")
     @Column(name = "doctorId")
     private int doctorId;
 
+    @NotBlank(message = "Doctor name is required")
     @Column(name = "doctorName")
     private String doctorName;
 
