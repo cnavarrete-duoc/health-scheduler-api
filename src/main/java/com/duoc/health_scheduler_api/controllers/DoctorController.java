@@ -173,6 +173,6 @@ public class DoctorController {
 
                 doctorService.deleteDoctor(doctorId);
 
-                return ResponseEntity.noContent().build(); // Devuelve 204 No Content
+                return ResponseEntity.noContent().build();
         }
 }
