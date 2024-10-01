@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -64,7 +65,7 @@ public class DoctorController {
         return ResponseEntity.ok(collectionModel);
     }
 
-    @PostMapping("/doctor")
+    @PostMapping(path = "/doctor", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<EntityModel<Doctor>> addDoctor(@Valid @RequestBody Doctor doctor) {
         logger.info("POST /api/v1/doctor");
         logger.info("Adding doctor: {}", doctor);
